@@ -1,0 +1,16 @@
+<!-- <h1>Chat Room</h1><!--  -->
+
+<% if user_signed_in? %>
+
+    <h1> <%= current_user.email  %> </h1>
+
+    <%= react_component('ActionChat', {user: current_user, friends: @friends, messages: @messages, online: current_user.online, all_users: User.all, group_chats: @group_chats, notifications: current_user.notifications}) %>
+
+<% else %>
+
+    <h1>You Must Be Signed in To Chat</h1>
+    <a href="/users/sign_up">Sign Up</a>
+    <br>
+    <a href="/users/sign_in">Sign In</a>
+
+<% end %>

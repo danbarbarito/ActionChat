@@ -1,0 +1,8 @@
+Description:
+    Creates an ActionChat component
+
+Example:
+    rails generate actionchat
+
+    This will create:
+        An ActionChat component that allows users to chat.

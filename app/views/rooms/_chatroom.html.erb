@@ -1,0 +1,10 @@
+<div id="messages">
+  <%= render @messages %>
+</div>
+
+<form>
+  <label>Chat away:</label><br>
+  <input id="message" type="text" data-behavior="room_speaker">
+  <input id="author" type="hidden" data-behavior="room_speaker" value="<%= current_user.id %>">
+  <input id="room" type="hidden" data-behavior="room_speaker" value="<%= 'default' %>">
+</form>

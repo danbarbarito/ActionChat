@@ -81,4 +81,6 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   config.action_cable.allowed_request_origins = ['http://52.8.41.30']
+
+  config.session_store :cookie_store, :key => '_actionchat_session' , :domain => :all
 end

@@ -20,7 +20,7 @@ default: &default
 
 development:
   <<: *default
-  database: actionchat_dev
+  database: actionchat
   socket: /var/run/mysqld/mysqld.sock
 
 staging:

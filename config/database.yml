@@ -57,4 +57,5 @@ test:
 #
 production:
   <<: *default
+  socket: /var/run/mysqld/mysqld.sock
   database: actionchat

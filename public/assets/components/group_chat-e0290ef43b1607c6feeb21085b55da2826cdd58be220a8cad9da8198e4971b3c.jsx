@@ -1,11 +1,12 @@
-var IndividualMessage = React.createClass({
+var GroupChat = React.createClass({
     propTypes: {
         current_user: React.PropTypes.object,
         all_users: React.PropTypes.array,
-        user: React.PropTypes.object,
+        groupChat: React.PropTypes.object,
         toggleMessage: React.PropTypes.func,
         closeMessage: React.PropTypes.func,
         messages: React.PropTypes.array,
+        addToChat: React.PropTypes.func
     },
 
     getInitialState: function() {
@@ -15,18 +16,20 @@ var IndividualMessage = React.createClass({
 
             selectedUser: null,
             searchContent: "",
-            searchedUsers: []
+            searchedUsers: [],
+            groupChatUsers: this.props.groupChat.users
         };
     },
 
     componentDidMount: function() {
         $("#messages").children().hide();
         $("#conversation").children().hide();
+        $("#messageList").scrollTop(99999);
     },
 
     render: function() {
         return (
-            <div className={"room_channel_" + this.props.user.id} id="individualMessage">
+            <div className={"room_channel_group_" + this.props.groupChat.id} id="groupChat">
                 <div id="addToChatBox">
                     <div id="messageHeader">
                         <b>Invite User to Chat</b>
@@ -42,20 +45,24 @@ var IndividualMessage = React.createClass({
                         {this.state.searchedUsers}
                     </div>
                 </div>
+                <div id="listUsersBox">
+                    {this.groupChatUsers()}
+                </div>
                 <div id="messageHeader" onClick={this.props.toggleMessage}>
-                    {this.getOnlineStatus(this.props.user.online)}
-                    <b>{this.props.user.email}</b>
-                    <a href="#" onClick={this.props.closeMessage.bind(null, "room_channel_" + this.props.user.id)} id="messageClose">&#215;</a>
+                    <b onClick={this.clickHeader}>{this.props.groupChat.id}</b>
+                    <a href="#" id="listUsers" onClick={this.listUsers}>Show Users</a>
+                    <a href="#" onClick={this.props.closeMessage.bind(null, "room_channel_group_" + this.props.groupChat.id)} id="messageClose">&#215;</a>
                     <br />
                     <a href="#" id="addToChat" onClick={this.addToChat}>Invite to Chat</a>
                 </div>
-                <div className={"room_channel_" + this.props.user.id} id="messageList">
+                <div className={"room_channel_group_" + this.props.groupChat.id} id="messageList">
                     {this.messages()}
                 </div>
                 <div id="messageForm">
                     <form>
-                        <input id="message" type="text" className={"room_channel_" + this.props.user.id} onChange={this.updateMessageContent} onKeyDown={this.handleSend} data-behavior="room_speaker" value={this.state.messageContent}/>
-                        <input id="room" type="hidden" data-behavior="room_speaker" value={this.props.user.id}/>
+                        <input id="message" type="text" className={"room_channel_group_" + this.props.groupChat.id} onChange={this.updateMessageContent} onKeyDown={this.handleSend} data-behavior="room_speaker" value={this.state.messageContent}/>
+                        <input id="room" type="hidden" data-behavior="room_speaker" value={"group_" + this.props.groupChat.id}/>
+
                     </form>
                 </div>
             </div>
@@ -71,14 +78,19 @@ var IndividualMessage = React.createClass({
         return status;
     },
 
-    messages: function() {
+    clickHeader: function(e) {
+        $(e.target).parent().click();
+    },
 
+    messages: function() {
         var messages = [];
         var _this = this;
         this.props.messages.forEach(function(message) {
             var message_class;
             if (_this.props.current_user.id == message.author) {
                 message_class = "to";
+            } else if (message.author == -1) {
+                message_class = "system";
             } else {
                 message_class = "from";
             }
@@ -94,10 +106,10 @@ var IndividualMessage = React.createClass({
     handleSend: function(event) {
         var _this = this;
         if (event.keyCode == 13) { // Enter key
-            var room = "" +  _this.props.user.id;
+            var room = "group_" +  _this.props.groupChat.id;
             App.room.speak(room, _this.state.messageContent);
             _this.setState({messageContent: ""});
-            $("input.room_channel_" + _this.props.user.id).prop("disabled", true);
+            $("input.room_channel_group_" + _this.props.groupChat.id).prop("disabled", true);
             event.preventDefault();
         }
     },
@@ -107,6 +119,15 @@ var IndividualMessage = React.createClass({
                    ? "online"
                    : "offline";
         return (<span id="onlineStatus" className={status}></span>);
+    },
+
+    addToChat: function(e) {
+        e.stopPropagation();
+        $(".room_channel_group_" + this.props.groupChat.id + " > #addToChatBox").toggle();
+    },
+
+    clickHeader: function(e) {
+        $(e.target).parent().click();
     },
 
     updateMessageContent: function(e) {
@@ -120,41 +141,64 @@ var IndividualMessage = React.createClass({
             searchContent: "",
             searchedUsers: []
         });
-        $(".room_channel_" + this.props.user.id + " > #addToChatBox").hide();
+        $(".room_channel_group_" + this.props.groupChat.id + " > #addToChatBox").hide();
     },
 
     userResults: function(e) {
         var searchedUsers = [];
         var _this = this;
+        var alreadyInChat = false;
         this.setState({searchContent: e.target.value});
         this.props.all_users.forEach(function(user){
-            if (e.target.value != "" && user.email.indexOf(e.target.value) != -1 && user.id != _this.props.current_user.id && user.id != _this.props.user.id) {
-                searchedUsers.push(<UserSearchResult onClick={this.sendChatInvite} user={user} setUser={_this.setUser} />);
+            if (e.target.value != "" && user.email.indexOf(e.target.value) != -1 && user.id != _this.props.current_user.id) {
+                _this.props.groupChat.users.forEach(function(gc_user, index) {
+                    if (gc_user.id == user.id) {
+                        alreadyInChat = true;
+                    }
+                });
+                if (!alreadyInChat) {
+                    searchedUsers.push(<UserSearchResult user={user} setUser={_this.setUser} />);
+                }
             }
+            alreadyInChat = false;
         });
         this.setState({searchedUsers: searchedUsers});
     },
 
     setUser: function(u) {
+        var groupChatUsers = this.state.groupChatUsers;
+        groupChatUsers.push(u);
+        this.setState({groupChatUsers: groupChatUsers});
         this.setState({searchContent: "", selectedUser: u});
         $.ajax({
             method: "POST",
-            url: "/users/create_group_chat/" + this.props.user.id + "/" + u.id
+            url: "/users/add_to_group_chat/" + this.props.groupChat.id + "/" + u.id
         });
         this.closeNewMessage();
     },
 
-    sendingPrompt: function() {
-        if (this.state.selectedUser) {
-            return "To: " + this.state.selectedUser.email;
-        } else {
-            return "";
-        }
+    listUsers: function(e) {
+        e.stopPropagation();
+        $(".room_channel_group_" + this.props.groupChat.id + " > #listUsersBox").toggle();
     },
 
-    addToChat: function(e) {
-        e.stopPropagation();
-        $(".room_channel_" + this.props.user.id + " > #addToChatBox").toggle();
+    groupChatUsers: function() {
+        var usersList = [];
+        var _this = this;
+        this.state.groupChatUsers.forEach(function(user, index) {
+            usersList.push(
+                <div key={user.id} id="friend">{_this.getOnlineStatus(user.online)} <div id="userName"> {user.email} </div> </div>
+            );
+        });
+        return usersList;
     },
+
+    getOnlineStatus: function(online) {
+        var status = online
+                   ? "online"
+                   : "offline";
+        return (<span id="onlineStatus" className={status}></span>);
+    },
+
 
 });

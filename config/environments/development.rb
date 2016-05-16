@@ -54,6 +54,8 @@ Rails.application.configure do
   # routes, locales, etc. This feature depends on the listen gem.
   # config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
+  config.action_cable.allowed_request_origins = ['http://52.8.41.30']
+
   ActiveJob::AsyncJob.const_set :DEFAULT_EXECUTOR_OPTIONS,
                                 ActiveJob::AsyncJob::DEFAULT_EXECUTOR_OPTIONS.merge(min_threads: 0, max_threads: 8, idletime: 15)
 

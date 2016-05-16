@@ -20,7 +20,7 @@ var IndividualMessage = React.createClass({
     },
 
     componentDidMount: function() {
-        $("#messages").children().hide();
+        $("#individualMessage").hide();
         $("#conversation").children().hide();
     },
 

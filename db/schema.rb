@@ -13,45 +13,45 @@
 
 ActiveRecord::Schema.define(version: 20160425025404) do
 
-  create_table "friendships", force: :cascade do |t|
+  create_table "friendships", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer  "user_id"
     t.integer  "friend_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "group_chat_handlers", force: :cascade do |t|
+  create_table "group_chat_handlers", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer  "user_id"
     t.integer  "group_chat_id"
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false
   end
 
-  add_index "group_chat_handlers", ["group_chat_id"], name: "index_group_chat_handlers_on_group_chat_id"
-  add_index "group_chat_handlers", ["user_id"], name: "index_group_chat_handlers_on_user_id"
+  add_index "group_chat_handlers", ["group_chat_id"], name: "index_group_chat_handlers_on_group_chat_id", using: :btree
+  add_index "group_chat_handlers", ["user_id"], name: "index_group_chat_handlers_on_user_id", using: :btree
 
-  create_table "group_chats", force: :cascade do |t|
+  create_table "group_chats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "messages", force: :cascade do |t|
-    t.text     "content"
+  create_table "messages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.text     "content",    limit: 65535
     t.integer  "author"
-    t.text     "room"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.text     "room",       limit: 65535
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
   end
 
-  create_table "notifications", force: :cascade do |t|
+  create_table "notifications", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer  "user_id"
     t.integer  "author_id"
-    t.text     "author_name"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.text     "author_name", limit: 65535
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
   end
 
-  create_table "users", force: :cascade do |t|
+  create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string   "email",                  default: "",   null: false
     t.string   "encrypted_password",     default: "",   null: false
     t.string   "reset_password_token"
@@ -68,7 +68,7 @@ ActiveRecord::Schema.define(version: 20160425025404) do
     t.datetime "last_seen"
   end
 
-  add_index "users", ["email"], name: "index_users_on_email", unique: true
-  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
+  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
 
 end

@@ -4,11 +4,14 @@ class MessageBroadcastJob < ApplicationJob
   def perform(message)
 
     unless message.room.include?("group")
+
+      Rails.logger.debug("IT SHOULD BE BROADCASTING...?")
       # Broadcast to author
       ActionCable.server.broadcast "room_channel_#{message.author}", content: render_message(message, "to"), room: "room_channel_#{message.room}", author: message.author
       # Broadcast to recipient
       ActionCable.server.broadcast "room_channel_#{message.room}", content: render_message(message, "from"), room: "room_channel_#{message.author}", author: message.author, author_obj: User.find(message.author)
       Notification.create!(user: User.find(message["room"].to_i), author_id: message["author"], author_name: User.find(message["author"]).email) unless message["room"].include?("nil") || message["room"].include?("group_")
+      Rails.logger.debug("IT SHOULD HAVE BROADCASTED")
     else
       unless message.author == -1
         # Broadcast to author
